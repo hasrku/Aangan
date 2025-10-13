@@ -1,0 +1,207 @@
+@import "tailwindcss";
+
+/* New Design System - Color Palette */
+:root {
+    /* barn_red */
+    --barn_red-100: #180000;
+    --barn_red-200: #310000;
+    --barn_red-300: #490000;
+    --barn_red-400: #620000;
+    --barn_red-500: #780000; /* DEFAULT */
+    --barn_red-600: #c80000;
+    --barn_red-700: #ff1616;
+    --barn_red-800: #ff6464;
+    --barn_red-900: #ffb1b1;
+
+    /* fire_brick */
+    --fire_brick-100: #260406;
+    --fire_brick-200: #4d070c;
+    --fire_brick-300: #730b12;
+    --fire_brick-400: #990e17;
+    --fire_brick-500: #c1121f; /* DEFAULT */
+    --fire_brick-600: #eb2330;
+    --fire_brick-700: #f05a64;
+    --fire_brick-800: #f59198;
+    --fire_brick-900: #fac8cb;
+
+    /* papaya_whip */
+    --papaya_whip-100: #593c04;
+    --papaya_whip-200: #b17908;
+    --papaya_whip-300: #f5ae22;
+    --papaya_whip-400: #f9cf7b;
+    --papaya_whip-500: #fdf0d5; /* DEFAULT */
+    --papaya_whip-600: #fdf2dc;
+    --papaya_whip-700: #fef5e5;
+    --papaya_whip-800: #fef9ed;
+    --papaya_whip-900: #fffcf6;
+
+    /* prussian_blue */
+    --prussian_blue-100: #00090e;
+    --prussian_blue-200: #00131d;
+    --prussian_blue-300: #001c2b;
+    --prussian_blue-400: #002539;
+    --prussian_blue-500: #003049; /* DEFAULT */
+    --prussian_blue-600: #00679f;
+    --prussian_blue-700: #00a0f7;
+    --prussian_blue-800: #50c2ff;
+    --prussian_blue-900: #a7e0ff;
+
+    /* air_superiority_blue */
+    --air_superiority_blue-100: #122028;
+    --air_superiority_blue-200: #233f51;
+    --air_superiority_blue-300: #355f79;
+    --air_superiority_blue-400: #477fa2;
+    --air_superiority_blue-500: #669bbc; /* DEFAULT */
+    --air_superiority_blue-600: #85afc9;
+    --air_superiority_blue-700: #a4c3d7;
+    --air_superiority_blue-800: #c2d7e4;
+    --air_superiority_blue-900: #e1ebf2;
+}
+
+/* Utility helpers based on palette */
+.bg-app-surface {
+    background-color: var(--papaya_whip-900);
+}
+.bg-app-surface-soft {
+    background-color: var(--papaya_whip-800);
+}
+.text-brand {
+    color: var(--prussian_blue-500);
+}
+.text-accent {
+    color: var(--fire_brick-500);
+}
+.border-soft {
+    border-color: var(--air_superiority_blue-900);
+}
+.btn-primary {
+    background: linear-gradient(90deg, var(--fire_brick-500), var(--barn_red-500));
+    color: #fff;
+}
+.btn-primary:hover {
+    background: linear-gradient(90deg, var(--fire_brick-600), var(--barn_red-600));
+}
+.badge-buy {
+    background-color: var(--air_superiority_blue-500);
+    color: #fff;
+}
+.badge-sell {
+    background-color: var(--prussian_blue-500);
+    color: #fff;
+}
+.badge-rent {
+    background-color: var(--fire_brick-500);
+    color: #fff;
+}
+
+/* Custom styles for better UX */
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Custom scrollbar for sidebar */
+.sidebar-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Hover animations */
+.hover-lift {
+    transition: transform 0.2s ease-in-out;
+}
+
+.hover-lift:hover {
+    transform: translateY(-2px);
+}
+
+/* Loading animation */
+@keyframes shimmer {
+    0% {
+        background-position: -200px 0;
+    }
+    100% {
+        background-position: calc(200px + 100%) 0;
+    }
+}
+
+.shimmer {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200px 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+/* Old custom color helpers (kept for backward compatibility) */
+.bg-red-50-custom {
+    background-color: var(--papaya_whip-600);
+}
+.bg-green-50-custom {
+    background-color: var(--air_superiority_blue-900);
+}
+.bg-blue-50-custom {
+    background-color: var(--air_superiority_blue-900);
+}
+.bg-purple-50-custom {
+    background-color: var(--papaya_whip-800);
+}
+.bg-teal-50-custom {
+    background-color: var(--papaya_whip-800);
+}
+
+.text-red-600-custom {
+    color: var(--fire_brick-500);
+}
+.text-green-600-custom {
+    color: var(--air_superiority_blue-500);
+}
+.text-blue-600-custom {
+    color: var(--prussian_blue-500);
+}
+.text-purple-600-custom {
+    color: var(--barn_red-500);
+}
+.text-teal-600-custom {
+    color: var(--air_superiority_blue-500);
+}
+
+/* Gradients tuned to palette */
+.bg-gradient-red {
+    background: linear-gradient(135deg, var(--papaya_whip-900), var(--papaya_whip-700));
+}
+.bg-gradient-green {
+    background: linear-gradient(135deg, var(--air_superiority_blue-900), var(--air_superiority_blue-800));
+}
+.bg-gradient-blue {
+    background: linear-gradient(135deg, var(--prussian_blue-900), var(--air_superiority_blue-900));
+}
+.bg-gradient-purple {
+    background: linear-gradient(135deg, var(--barn_red-900), var(--papaya_whip-900));
+}
+.bg-gradient-teal {
+    background: linear-gradient(135deg, var(--air_superiority_blue-900), var(--papaya_whip-900));
+}
