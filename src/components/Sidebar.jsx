@@ -6,7 +6,7 @@ const Sidebar = ({ onFilterChange, activeCategory, setActiveCategory }) => {
     const [propertyType, setPropertyType] = useState("");
     const [location, setLocation] = useState("");
 
-    const propertyTypes = ["Apartment", "House", "Villa", "Studio", "Penthouse", "Townhouse"];
+    const propertyTypes = ["Apartment", "House", "Villa", "Plot", "Penthouse"];
 
     const locations = ["Mumbai", "Delhi", "Bangalore", "Chennai", "Kolkata", "Pune", "Hyderabad"];
 

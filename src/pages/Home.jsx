@@ -3,7 +3,7 @@ import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
 import PropertyCard from "../components/PropertyCard";
 import Footer from "../components/Footer";
-import axios from "axios";
+import { fetchAllProperties } from "../backend/property";
 
 const Home = () => {
     const [properties, setProperties] = useState([]);
@@ -11,93 +11,37 @@ const Home = () => {
     const [activeCategory, setActiveCategory] = useState("all");
     const [loading, setLoading] = useState(true);
 
-    // Generate property data with images from Unsplash
-    const generateProperties = async () => {
-        const propertyTypes = ["Apartment", "House", "Villa", "Studio", "Penthouse"];
-        const locations = ["Mumbai", "Delhi", "Bangalore", "Chennai", "Kolkata", "Pune", "Hyderabad"];
-        const categories = ["buy", "sell", "rent"];
-
-        const propertyData = [];
-
-        for (let i = 0; i < 10; i++) {
-            const type = propertyTypes[Math.floor(Math.random() * propertyTypes.length)];
-            const location = locations[Math.floor(Math.random() * locations.length)];
-            const category = categories[Math.floor(Math.random() * categories.length)];
-
-            // Generate random price based on category
-            let price;
-            if (category === "rent") {
-                price = Math.floor(Math.random() * 50000) + 10000; // 10k-60k for rent
-            } else {
-                price = Math.floor(Math.random() * 50000000) + 5000000; // 50L-5Cr for buy/sell
-            }
-
-            const bedrooms = Math.floor(Math.random() * 4) + 1;
-            const bathrooms = Math.floor(Math.random() * 3) + 1;
-            const area = Math.floor(Math.random() * 2000) + 500;
-
-            // Generate image URL with property-related queries
-            const imageQueries = [
-                "modern house exterior",
-                "apartment building",
-                "luxury villa",
-                "studio apartment",
-                "penthouse view",
-                "townhouse",
-                "real estate property",
-                "residential building",
-            ];
-
-            const query = imageQueries[Math.floor(Math.random() * imageQueries.length)];
-            const imageUrl = `https://images.unsplash.com/photo-${Math.floor(
-                Math.random() * 1000000
-            )}?w=400&h=300&fit=crop&crop=center&auto=format&q=80&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D`;
-            propertyData.push({
-                id: i + 1,
-                title: `${type} in ${location}`,
-                price,
-                location,
-                bedrooms,
-                bathrooms,
-                area,
-                image: imageUrl,
-                type: category,
-                category,
-            });
-        }
-
-        setProperties(propertyData);
-        setFilteredProperties(propertyData.filter((p) => p.category === activeCategory));
-        setLoading(false);
-    };
-
     useEffect(() => {
         document.title = "Aangan - Property Solutions";
     }, []);
 
     useEffect(() => {
-        generateProperties();
-    }, []);
-
-    useEffect(() => {
-        if (activeCategory === "all") {
-            setFilteredProperties(properties);
+        if (properties.length === 0) {
+            const getProperties = async () => {
+                setLoading(true);
+                const data = await fetchAllProperties();
+                console.log(data);
+                setProperties(data);
+                setFilteredProperties(activeCategory === "all" ? data : data.filter((p) => p.listing_type === activeCategory));
+                setLoading(false);
+            };
+            getProperties();
         } else {
-            setFilteredProperties(properties.filter((p) => p.category === activeCategory));
+            setFilteredProperties(activeCategory === "all" ? properties : properties.filter((p) => p.listing_type === activeCategory));
         }
-    }, [activeCategory, properties]);
+    }, [activeCategory]);
 
     const handleFilterChange = (filters) => {
-        let filtered = activeCategory === "all" ? properties : properties.filter((p) => p.category === activeCategory);
+        let filtered = activeCategory === "all" ? properties : properties.filter((p) => p.listing_type === activeCategory);
 
-        if (filters.priceRange.min) {
-            filtered = filtered.filter((p) => p.price >= parseInt(filters.priceRange.min));
+        if (filters.priceRange?.min) {
+            filtered = filtered.filter((p) => Number(p.price) >= Number(filters.priceRange.min));
         }
-        if (filters.priceRange.max) {
-            filtered = filtered.filter((p) => p.price <= parseInt(filters.priceRange.max));
+        if (filters.priceRange?.max) {
+            filtered = filtered.filter((p) => Number(p.price) <= Number(filters.priceRange.max));
         }
         if (filters.propertyType) {
-            filtered = filtered.filter((p) => p.title.toLowerCase().includes(filters.propertyType.toLowerCase()));
+            filtered = filtered.filter((p) => p.propertyType.toLowerCase() === filters.propertyType.toLowerCase());
         }
         if (filters.location) {
             filtered = filtered.filter((p) => p.location === filters.location);
@@ -127,7 +71,7 @@ const Home = () => {
                             className="flex space-x-1 mb-6 p-1 rounded-lg w-fit"
                             style={{ backgroundColor: "var(--papaya_whip-800)" }}
                         >
-                            {["all", "buy", "sell", "rent"].map((category) => (
+                            {["all", "sale", "rent"].map((category) => (
                                 <button
                                     key={category}
                                     onClick={() => setActiveCategory(category)}
@@ -190,7 +134,7 @@ const Home = () => {
                                     </div>
                                 ))}
                             </div>
-                        ) : (
+                        ) : filteredProperties.length > 0 ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                                 {filteredProperties.map((property) => (
                                     <PropertyCard
@@ -199,28 +143,8 @@ const Home = () => {
                                     />
                                 ))}
                             </div>
-                        )}
-
-                        {!loading && filteredProperties.length === 0 && (
+                        ) : (
                             <div className="text-center py-12">
-                                <div
-                                    className="mb-4"
-                                    style={{ color: "var(--air_superiority_blue-400)" }}
-                                >
-                                    <svg
-                                        className="w-16 h-16 mx-auto"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth={1}
-                                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                                        />
-                                    </svg>
-                                </div>
                                 <h3
                                     className="text-lg font-medium mb-2"
                                     style={{ color: "var(--prussian_blue-500)" }}

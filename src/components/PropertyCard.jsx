@@ -3,7 +3,7 @@ import { FiHeart, FiMapPin, FiMaximize } from "react-icons/fi";
 import { FaBed, FaBath } from "react-icons/fa6";
 
 const PropertyCard = ({ property }) => {
-    const { id, title, price, location, bedrooms, bathrooms, area, image, type, isFavorite = false } = property;
+    const { id, title, price, location, bedrooms, bathrooms, area, image, listing_type, isFavorite = false } = property;
 
     const formatPrice = (price) => {
         if (price >= 10000000) {
@@ -15,9 +15,9 @@ const PropertyCard = ({ property }) => {
         }
     };
 
-    const typeToBadgeClass = (t) => {
-        if (t === "buy") return "badge-buy";
-        if (t === "sell") return "badge-sell";
+    const listing_typeToBadgeClass = (t) => {
+        if (t === "commercial") return "badge-buy";
+        if (t === "sale") return "badge-sell";
         if (t === "rent") return "badge-rent";
         return "";
     };
@@ -30,12 +30,9 @@ const PropertyCard = ({ property }) => {
             {/* Image Container */}
             <div className="relative h-48 overflow-hidden">
                 <img
-                    src={image}
+                    src={image || `https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&h=300&fit=crop&crop=center&auto=format&q=80`}
                     alt={title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    onError={(e) => {
-                        e.target.src = `https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&h=300&fit=crop&crop=center&auto=format&q=80`;
-                    }}
                 />
                 <div className="absolute top-3 right-3">
                     <button className="p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-sm hover:bg-white transition-colors duration-200">
@@ -43,7 +40,9 @@ const PropertyCard = ({ property }) => {
                     </button>
                 </div>
                 <div className="absolute top-3 left-3">
-                    <span className={`px-3 py-1 text-white text-xs font-medium rounded-full ${typeToBadgeClass(type)}`}>{type}</span>
+                    <span className={`px-3 py-1 text-white text-xs font-medium rounded-full ${listing_typeToBadgeClass(listing_type)}`}>
+                        {listing_type}
+                    </span>
                 </div>
             </div>
 
@@ -100,6 +99,7 @@ const PropertyCard = ({ property }) => {
                         backgroundColor: "var(--papaya_whip-900)",
                         borderColor: "var(--air_superiority_blue-900)",
                     }}
+                    onClick={() => (window.location.href = `/property/${id}`)}
                 >
                     View Details
                 </button>
