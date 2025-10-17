@@ -8,6 +8,7 @@ import Footer from "../../components/Footer";
 import SkeletonCard from "../../components/SkeletonCard";
 import ConfirmBox from "../../components/ConfirmBox";
 
+import { supabase } from "../../utils/supabaseClient";
 import { useUser } from "../../utils/userContext";
 import { useNavigate } from "react-router-dom";
 import { uploadProperty, fetchUserProperties, deleteProperty } from "../../backend/property";
@@ -180,64 +181,65 @@ const ListingsSection = ({ setActiveTab, user }) => {
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {listings.map((listing) => (
-                        <div
-                            key={listing.id}
-                            className="bg-white border border-gray-200 rounded-2xl shadow-sm hover:shadow-md transition overflow-hidden"
-                        >
-                            {/* Image */}
-                            <div className="h-48 bg-gray-100">
-                                <img
-                                    src={
-                                        listing.image_url ||
-                                        "https://images.unsplash.com/photo-1600607688969-a5bfcd646154?auto=format&fit=crop&w=1600&q=80"
-                                    }
-                                    alt={listing.title}
-                                    className="w-full h-full object-cover"
-                                />
-                            </div>
+                    {listings.map((listing) => {
+                        // Use first image of the property or fallback
+                        const coverImage =
+                            listing.images && listing.images.length > 0
+                                ? listing.images[0]
+                                : "https://images.unsplash.com/photo-1600607688969-a5bfcd646154?auto=format&fit=crop&w=1600&q=80";
 
-                            {/* Details */}
-                            <div className="p-4">
-                                <div className="flex items-center justify-between mb-2">
-                                    <h3 className="text-lg font-semibold text-gray-800 truncate">{listing.title}</h3>
-                                    <p className="flex items-center text-gray-500 text-sm mt-1">
-                                        <FiMapPin className="w-4 h-4 mr-1" /> {listing.location}
-                                    </p>
+                        return (
+                            <div
+                                key={listing.id}
+                                className="bg-white border border-gray-200 rounded-2xl shadow-sm hover:shadow-md transition overflow-hidden"
+                            >
+                                {/* Image */}
+                                <div className="h-48 bg-gray-100">
+                                    <img
+                                        src={coverImage}
+                                        alt={listing.title}
+                                        className="w-full h-full object-cover"
+                                    />
                                 </div>
-                                <div className="flex items-center justify-between mt-4">
-                                    <span className="text-lg font-semibold text-indigo-600">₹{listing.price}</span>
-                                    <div className="flex gap-3">
-                                        <button
-                                            onClick={() => {
-                                                // Navigate to property details page
-                                                window.location.href = `/property/${listing.id}`;
-                                            }}
-                                            className="p-2 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-600 transition"
-                                        >
-                                            <FiEye />
-                                        </button>
-                                        <button
-                                            onClick={() => {
-                                                setSelectedProperty(listing.id);
-                                                setConfirmOpen(true);
-                                            }}
-                                            className="p-2 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 transition"
-                                        >
-                                            <FiTrash2 />
-                                        </button>
+
+                                {/* Details */}
+                                <div className="p-4">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <h3 className="text-lg font-semibold text-gray-800 truncate">{listing.title}</h3>
+                                        <p className="flex items-center text-gray-500 text-sm mt-1">
+                                            <FiMapPin className="w-4 h-4 mr-1" /> {listing.location}
+                                        </p>
+                                    </div>
+                                    <div className="flex items-center justify-between mt-4">
+                                        <span className="text-lg font-semibold text-indigo-600">₹{listing.price}</span>
+                                        <div className="flex gap-3">
+                                            <button
+                                                onClick={() => (window.location.href = `/property/${listing.id}`)}
+                                                className="p-2 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-600 transition"
+                                            >
+                                                <FiEye />
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    setSelectedProperty(listing.id);
+                                                    setConfirmOpen(true);
+                                                }}
+                                                className="p-2 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 transition"
+                                            >
+                                                <FiTrash2 />
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             )}
         </div>
     );
 };
 
-// Add Property Section Component
 const AddPropertySection = ({ user }) => {
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
@@ -252,22 +254,38 @@ const AddPropertySection = ({ user }) => {
         area: "",
         furnishingStatus: "",
     });
+    const [images, setImages] = useState([]);
 
     const handleChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value,
-        });
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleImageChange = (e) => {
+        const selectedFiles = Array.from(e.target.files);
+
+        let newFiles = [...images, ...selectedFiles];
+
+        // ✅ If more than 4 images selected, take only first 4
+        if (newFiles.length > 4) {
+            newFiles = newFiles.slice(0, 4);
+            toast.error("You can upload a maximum of 4 images per property.");
+        }
+
+        setImages(newFiles);
+    };
+
+    const removeImage = (index) => {
+        setImages((prev) => prev.filter((_, i) => i !== index));
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
+        console.log(user);
 
         try {
-            const result = await uploadProperty(formData, user);
+            await uploadProperty(formData, user, images);
             toast.success("Property added successfully!");
-            console.log("Inserted property:", result);
 
             // Reset form
             setFormData({
@@ -282,9 +300,10 @@ const AddPropertySection = ({ user }) => {
                 area: "",
                 furnishingStatus: "",
             });
+            setImages([]);
         } catch (err) {
             console.error(err);
-            toast.error(`${err.message}`);
+            toast.error(err.message);
         } finally {
             setLoading(false);
         }
@@ -298,18 +317,23 @@ const AddPropertySection = ({ user }) => {
             >
                 Add New Property
             </h2>
+
             <form
                 onSubmit={handleSubmit}
                 className="space-y-6"
             >
+                {/* Existing form fields... */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 ">
+                    {" "}
                     <div className=" col-span-full">
+                        {" "}
                         <label
                             className="block text-sm font-medium mb-2"
                             style={{ color: "var(--prussian_blue-500)" }}
                         >
-                            Property Title
-                        </label>
+                            {" "}
+                            Property Title{" "}
+                        </label>{" "}
                         <input
                             type="text"
                             name="title"
@@ -319,15 +343,17 @@ const AddPropertySection = ({ user }) => {
                             className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all duration-200"
                             style={{ borderColor: "var(--air_superiority_blue-900)" }}
                             placeholder="Enter property title"
-                        />
-                    </div>
+                        />{" "}
+                    </div>{" "}
                     <div>
+                        {" "}
                         <label
                             className="block text-sm font-medium mb-2"
                             style={{ color: "var(--prussian_blue-500)" }}
                         >
-                            Price (₹)
-                        </label>
+                            {" "}
+                            Price (₹){" "}
+                        </label>{" "}
                         <input
                             type="number"
                             name="price"
@@ -337,15 +363,17 @@ const AddPropertySection = ({ user }) => {
                             className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all duration-200"
                             style={{ borderColor: "var(--air_superiority_blue-900)" }}
                             placeholder="Enter price"
-                        />
-                    </div>
+                        />{" "}
+                    </div>{" "}
                     <div>
+                        {" "}
                         <label
                             className="block text-sm font-medium mb-2"
                             style={{ color: "var(--prussian_blue-500)" }}
                         >
-                            Listing Type
-                        </label>
+                            {" "}
+                            Listing Type{" "}
+                        </label>{" "}
                         <select
                             name="listingType"
                             value={formData.listingType}
@@ -354,18 +382,19 @@ const AddPropertySection = ({ user }) => {
                             className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all duration-200"
                             style={{ borderColor: "var(--air_superiority_blue-900)" }}
                         >
-                            <option value="">Select listing type</option>
-                            <option value="sale">Sale</option>
-                            <option value="rent">Rent</option>
-                        </select>
-                    </div>
+                            {" "}
+                            <option value="">Select listing type</option> <option value="sale">Sale</option> <option value="rent">Rent</option>{" "}
+                        </select>{" "}
+                    </div>{" "}
                     <div>
+                        {" "}
                         <label
                             className="block text-sm font-medium mb-2"
                             style={{ color: "var(--prussian_blue-500)" }}
                         >
-                            Location
-                        </label>
+                            {" "}
+                            Location{" "}
+                        </label>{" "}
                         <input
                             type="text"
                             name="location"
@@ -375,15 +404,17 @@ const AddPropertySection = ({ user }) => {
                             className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all duration-200"
                             style={{ borderColor: "var(--air_superiority_blue-900)" }}
                             placeholder="Enter location"
-                        />
-                    </div>
+                        />{" "}
+                    </div>{" "}
                     <div>
+                        {" "}
                         <label
                             className="block text-sm font-medium mb-2"
                             style={{ color: "var(--prussian_blue-500)" }}
                         >
-                            Property Type
-                        </label>
+                            {" "}
+                            Property Type{" "}
+                        </label>{" "}
                         <select
                             name="propertyType"
                             value={formData.propertyType}
@@ -392,21 +423,21 @@ const AddPropertySection = ({ user }) => {
                             className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all duration-200"
                             style={{ borderColor: "var(--air_superiority_blue-900)" }}
                         >
-                            <option value="">Select property type</option>
-                            <option value="apartment">Apartment</option>
-                            <option value="house">House</option>
-                            <option value="villa">Villa</option>
-                            <option value="plot">Plot</option>
-                            <option value="penthouse">Penthouse</option>
-                        </select>
-                    </div>
+                            {" "}
+                            <option value="">Select property type</option> <option value="apartment">Apartment</option>{" "}
+                            <option value="house">House</option> <option value="villa">Villa</option> <option value="plot">Plot</option>{" "}
+                            <option value="penthouse">Penthouse</option>{" "}
+                        </select>{" "}
+                    </div>{" "}
                     <div>
+                        {" "}
                         <label
                             className="block text-sm font-medium mb-2"
                             style={{ color: "var(--prussian_blue-500)" }}
                         >
-                            Bedrooms
-                        </label>
+                            {" "}
+                            Bedrooms{" "}
+                        </label>{" "}
                         <input
                             type="number"
                             name="bedrooms"
@@ -415,15 +446,17 @@ const AddPropertySection = ({ user }) => {
                             className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all duration-200"
                             style={{ borderColor: "var(--air_superiority_blue-900)" }}
                             placeholder="Number of bedrooms"
-                        />
-                    </div>
+                        />{" "}
+                    </div>{" "}
                     <div>
+                        {" "}
                         <label
                             className="block text-sm font-medium mb-2"
                             style={{ color: "var(--prussian_blue-500)" }}
                         >
-                            Bathrooms
-                        </label>
+                            {" "}
+                            Bathrooms{" "}
+                        </label>{" "}
                         <input
                             type="number"
                             name="bathrooms"
@@ -432,15 +465,17 @@ const AddPropertySection = ({ user }) => {
                             className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all duration-200"
                             style={{ borderColor: "var(--air_superiority_blue-900)" }}
                             placeholder="Number of bathrooms"
-                        />
-                    </div>
+                        />{" "}
+                    </div>{" "}
                     <div>
+                        {" "}
                         <label
                             className="block text-sm font-medium mb-2"
                             style={{ color: "var(--prussian_blue-500)" }}
                         >
-                            Area (sq ft)
-                        </label>
+                            {" "}
+                            Area (sq ft){" "}
+                        </label>{" "}
                         <input
                             type="number"
                             name="area"
@@ -449,15 +484,17 @@ const AddPropertySection = ({ user }) => {
                             className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all duration-200"
                             style={{ borderColor: "var(--air_superiority_blue-900)" }}
                             placeholder="Property area"
-                        />
-                    </div>
+                        />{" "}
+                    </div>{" "}
                     <div>
+                        {" "}
                         <label
                             className="block text-sm font-medium mb-2"
                             style={{ color: "var(--prussian_blue-500)" }}
                         >
-                            Furnishing Status
-                        </label>
+                            {" "}
+                            Furnishing Status{" "}
+                        </label>{" "}
                         <select
                             name="furnishingStatus"
                             value={formData.furnishingStatus}
@@ -466,21 +503,21 @@ const AddPropertySection = ({ user }) => {
                             className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all duration-200"
                             style={{ borderColor: "var(--air_superiority_blue-900)" }}
                         >
-                            <option value="">Select furnishing status</option>
-                            <option value="furnished">Furnished</option>
-                            <option value="semi-furnished">Semi-Furnished</option>
-                            <option value="unfurnished">Unfurnished</option>
-                        </select>
-                    </div>
-                </div>
-
+                            {" "}
+                            <option value="">Select furnishing status</option> <option value="furnished">Furnished</option>{" "}
+                            <option value="semi-furnished">Semi-Furnished</option> <option value="unfurnished">Unfurnished</option>{" "}
+                        </select>{" "}
+                    </div>{" "}
+                </div>{" "}
                 <div>
+                    {" "}
                     <label
                         className="block text-sm font-medium mb-2"
                         style={{ color: "var(--prussian_blue-500)" }}
                     >
-                        Description
-                    </label>
+                        {" "}
+                        Description{" "}
+                    </label>{" "}
                     <textarea
                         name="description"
                         value={formData.description}
@@ -489,19 +526,97 @@ const AddPropertySection = ({ user }) => {
                         className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all duration-200"
                         style={{ borderColor: "var(--air_superiority_blue-900)" }}
                         placeholder="Describe your property..."
-                    />
+                    />{" "}
                 </div>
+                {/* 🖼️ Image Upload */}
+                <div>
+                    <div className="w-full">
+                        <label
+                            className="block text-sm font-medium mb-2"
+                            style={{ color: "var(--prussian_blue-500)" }}
+                        >
+                            Upload Property Images
+                        </label>
 
+                        <label
+                            htmlFor="file-upload"
+                            className="flex flex-col items-center justify-center w-full p-6 border-2 border-dashed rounded-2xl cursor-pointer 
+                   transition-all duration-300 hover:shadow-md hover:border-[var(--prussian_blue-500)] bg-white"
+                            style={{ borderColor: "var(--air_superiority_blue-900)" }}
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="w-10 h-10 mb-3 text-[var(--air_superiority_blue-400)]"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M7 16a4 4 0 01-.88-7.9A5 5 0 0115.9 8H17a4 4 0 010 8H7z"
+                                />
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M15 13l-3-3m0 0l-3 3m3-3v12"
+                                />
+                            </svg>
+
+                            <span className="text-sm font-medium text-[var(--air_superiority_blue-500)]">Click to upload or drag & drop images</span>
+                            <span className="text-xs mt-1 text-[var(--air_superiority_blue-400)]">(Max 4 images)</span>
+
+                            <input
+                                id="file-upload"
+                                type="file"
+                                accept="image/*"
+                                multiple
+                                onChange={handleImageChange}
+                                className="hidden"
+                            />
+                        </label>
+                    </div>
+
+                    {/* Preview */}
+                    {images.length > 0 && (
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-5">
+                            {images.map((img, index) => (
+                                <div
+                                    key={index}
+                                    className="relative"
+                                >
+                                    <img
+                                        src={URL.createObjectURL(img)}
+                                        alt={`preview-${index}`}
+                                        className="w-full h-32 object-cover rounded-lg"
+                                    />
+                                    <button
+                                        type="button"
+                                        className="absolute top-1 right-1 bg-black bg-opacity-50 text-white rounded-full px-2 py-1 text-xs"
+                                        onClick={() => removeImage(index)}
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+                {/* Submit */}
                 <div className="flex gap-4">
                     <button
                         type="submit"
+                        disabled={loading}
                         className="px-6 py-3 rounded-lg text-white"
                         style={{ backgroundColor: "var(--fire_brick-500)" }}
                     >
-                        Add Property
+                        {loading ? "Adding..." : "Add Property"}
                     </button>
                     <button
                         type="button"
+                        onClick={() => setImages([])}
                         className="px-6 py-3 rounded-lg border"
                         style={{ borderColor: "var(--air_superiority_blue-900)", color: "var(--prussian_blue-500)" }}
                     >
@@ -725,16 +840,18 @@ const SettingsSection = ({ user }) => {
 
 // Profile Section Component
 const ProfileSection = () => {
-    const { user, setUser, handleLogout } = useUser();
+    const { user, setUser } = useUser();
 
-    const [isEditing, setIsEditing] = useState(false); // Initialize with empty strings
+    const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState({
         firstName: "",
         lastName: "",
         email: "",
         phone: "",
     });
-    // ✨ ADD THIS useEffect TO SYNC STATE WITH PROPS
+    const [loading, setLoading] = useState(false);
+
+    // Sync user data to form
     useEffect(() => {
         if (user) {
             setFormData({
@@ -743,9 +860,8 @@ const ProfileSection = () => {
                 email: user.email || "",
                 phone: user.phone || "",
             });
-            // console.log(user);
         }
-    }, [user]); // This effect runs whenever the 'user' prop changes
+    }, [user]);
 
     const handleChange = (e) => {
         setFormData({
@@ -754,10 +870,51 @@ const ProfileSection = () => {
         });
     };
 
+    const validateForm = () => {
+        const { firstName, lastName, email, phone } = formData;
+        if (!firstName.trim() || !lastName.trim() || !email.trim() || !phone.trim()) {
+            toast.error("All fields are required!");
+            return false;
+        }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            toast.error("Invalid email format!");
+            return false;
+        }
+        const phoneRegex = /^\d{10}$/;
+        if (!phoneRegex.test(phone)) {
+            toast.error("Phone must be exactly 10 digits!");
+            return false;
+        }
+        return true;
+    };
+
     const handleSave = async () => {
-        // TODO: Implement profile update
-        console.log("Saving profile:", formData);
-        setIsEditing(false);
+        if (!validateForm()) return;
+
+        setLoading(true);
+        try {
+            const updates = {
+                firstName: formData.firstName,
+                lastName: formData.lastName,
+                phone: formData.phone,
+            };
+
+            // Update profile in Supabase 'users' table
+            const { error } = await supabase.from("profiles").update(updates).eq("id", user.sub);
+
+            if (error) throw error;
+
+            // Update user context
+            setUser({ ...user, ...updates });
+
+            toast.success("Profile updated successfully!");
+            setIsEditing(false);
+        } catch (err) {
+            console.error("Error updating profile:", err);
+            toast.error(err.message || "Failed to update profile");
+        }
+        setLoading(false);
     };
 
     return (
@@ -779,6 +936,7 @@ const ProfileSection = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* First Name */}
                 <div>
                     <label
                         className="block text-sm font-medium mb-2"
@@ -796,6 +954,8 @@ const ProfileSection = () => {
                         style={{ borderColor: "var(--air_superiority_blue-900)" }}
                     />
                 </div>
+
+                {/* Last Name */}
                 <div>
                     <label
                         className="block text-sm font-medium mb-2"
@@ -813,6 +973,8 @@ const ProfileSection = () => {
                         style={{ borderColor: "var(--air_superiority_blue-900)" }}
                     />
                 </div>
+
+                {/* Email */}
                 <div>
                     <label
                         className="block text-sm font-medium mb-2"
@@ -830,6 +992,8 @@ const ProfileSection = () => {
                         style={{ borderColor: "var(--air_superiority_blue-900)" }}
                     />
                 </div>
+
+                {/* Phone */}
                 <div>
                     <label
                         className="block text-sm font-medium mb-2"
@@ -853,10 +1017,11 @@ const ProfileSection = () => {
                 <div className="mt-6 flex gap-4">
                     <button
                         onClick={handleSave}
+                        disabled={loading}
                         className="px-6 py-2 rounded-lg text-white"
                         style={{ backgroundColor: "var(--fire_brick-500)" }}
                     >
-                        Save Changes
+                        {loading ? "Saving..." : "Save Changes"}
                     </button>
                     <button
                         onClick={() => setIsEditing(false)}

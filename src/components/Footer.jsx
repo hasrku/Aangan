@@ -1,5 +1,6 @@
 import React from "react";
 import { FiHome, FiMail, FiPhone, FiMapPin, FiFacebook, FiTwitter, FiInstagram, FiLinkedin } from "react-icons/fi";
+import { FaGithub } from "react-icons/fa";
 
 const Footer = () => {
     return (
@@ -165,7 +166,8 @@ const Footer = () => {
                 {/* Bottom Section */}
                 <div className="border-t border-gray-700 mt-8 pt-8">
                     <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-                        <div className="text-gray-400 text-sm">© 2024 Aangan. All rights reserved.</div>
+                        <div className="text-gray-400 text-sm">© {new Date().getFullYear()} Aangan. All rights reserved.</div>
+
                         <div className="flex space-x-6 text-sm">
                             <a
                                 href="#"
@@ -187,6 +189,13 @@ const Footer = () => {
                             </a>
                         </div>
                     </div>
+                </div>
+                <br />
+                <div
+                    onClick={() => window.open("https://github.com/hasrku", "_blank")}
+                    className="text-gray-400 text-sm flex justify-center items-center gap-2 cursor-pointer"
+                >
+                    <FaGithub /> hasrku - Harshit Kushwaha
                 </div>
             </div>
         </footer>

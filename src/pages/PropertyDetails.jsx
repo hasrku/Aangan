@@ -14,17 +14,10 @@ const PropertyDetails = () => {
     const [loading, setLoading] = useState(true);
     const [currentImage, setCurrentImage] = useState(0);
 
-    const staticImages = [
-        "https://images.unsplash.com/photo-1600607688969-a5bfcd646154?auto=format&fit=crop&w=1600&q=80",
-        "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=1600&q=80",
-        "https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=1600&q=80",
-    ];
-
     useEffect(() => {
         const loadProperty = async () => {
             setLoading(true);
             const data = await fetchPropertyById(id);
-            console.log(data);
             if (!data) {
                 toast.error("Property not found!");
             } else {
@@ -34,9 +27,6 @@ const PropertyDetails = () => {
         };
         loadProperty();
     }, [id]);
-
-    const nextImage = () => setCurrentImage((prev) => (prev + 1) % staticImages.length);
-    const prevImage = () => setCurrentImage((prev) => (prev - 1 + staticImages.length) % staticImages.length);
 
     if (loading) {
         return <div className="min-h-screen flex items-center justify-center text-gray-600 text-lg">Loading property details...</div>;
@@ -51,6 +41,14 @@ const PropertyDetails = () => {
         );
     }
 
+    const images =
+        property.images && property.images.length > 0
+            ? property.images
+            : ["https://images.unsplash.com/photo-1600607688969-a5bfcd646154?auto=format&fit=crop&w=1600&q=80"];
+
+    const nextImage = () => setCurrentImage((prev) => (prev + 1) % images.length);
+    const prevImage = () => setCurrentImage((prev) => (prev - 1 + images.length) % images.length);
+
     return (
         <div
             className="min-h-screen flex flex-col"
@@ -60,51 +58,57 @@ const PropertyDetails = () => {
 
             <main className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-10 p-8 mt-6">
                 {/* Left: Carousel */}
-                <div className="lg:w-1/2 w-full relative">
+                <div className="md:w-[600px] w-full relative">
                     <motion.div
                         key={currentImage}
                         initial={{ opacity: 0, scale: 0.98 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.4 }}
-                        className="rounded-2xl overflow-hidden shadow-md"
+                        className="rounded-2xl  overflow-hidden shadow-md relative"
                     >
                         <img
-                            src={staticImages[currentImage]}
+                            src={images[currentImage]}
                             alt={`Property view ${currentImage + 1}`}
                             className="object-cover w-full h-[480px]"
                         />
+
+                        {/* Carousel Controls */}
+                        {images.length > 1 && (
+                            <>
+                                <button
+                                    onClick={prevImage}
+                                    className="absolute top-1/2 left-3 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-700 rounded-full p-3 h-12 aspect-square flex justify-center items-center text-center text-2xl shadow-md transition"
+                                >
+                                    <GrFormPrevious />
+                                </button>
+                                <button
+                                    onClick={nextImage}
+                                    className="absolute top-1/2 right-3 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-700 rounded-full p-3 h-12 aspect-square flex justify-center items-center text-center text-2xl shadow-md transition"
+                                >
+                                    <GrFormNext />
+                                </button>
+                            </>
+                        )}
                     </motion.div>
 
                     <p className="absolute top-3 left-3 bg-white px-2 py-1 rounded-md shadow-md">{property.listing_type}</p>
 
-                    {/* Carousel Controls */}
-                    <button
-                        onClick={prevImage}
-                        className="absolute top-1/2 left-3 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-700 rounded-full p-3 h-12 aspect-square flex justify-center items-center text-center text-2xl shadow-md transition"
-                    >
-                        <GrFormPrevious />
-                    </button>
-                    <button
-                        onClick={nextImage}
-                        className="absolute top-1/2 right-3 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-700 rounded-full p-3 h-12 aspect-square flex justify-center items-center text-center text-2xl shadow-md transition"
-                    >
-                        <GrFormNext />
-                    </button>
-
                     {/* Thumbnail Row */}
-                    <div className="flex gap-3 mt-4 justify-center">
-                        {staticImages.map((img, i) => (
-                            <img
-                                key={i}
-                                src={img}
-                                onClick={() => setCurrentImage(i)}
-                                className={`w-20 h-20 object-cover rounded-xl cursor-pointer border transition ${
-                                    i === currentImage ? "border-[var(--prussian_blue-500)]" : "border-transparent opacity-70 hover:opacity-100"
-                                }`}
-                                alt={`Thumbnail ${i + 1}`}
-                            />
-                        ))}
-                    </div>
+                    {images.length > 1 && (
+                        <div className="flex gap-3 mt-4 justify-center">
+                            {images.map((img, i) => (
+                                <img
+                                    key={i}
+                                    src={img}
+                                    onClick={() => setCurrentImage(i)}
+                                    className={`w-20 h-20 object-cover rounded-xl cursor-pointer border transition ${
+                                        i === currentImage ? "border-[var(--prussian_blue-500)]" : "border-transparent opacity-70 hover:opacity-100"
+                                    }`}
+                                    alt={`Thumbnail ${i + 1}`}
+                                />
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 {/* Right: Details */}
@@ -132,7 +136,7 @@ const PropertyDetails = () => {
                         </div>
 
                         <div
-                            className="flex items-center text-sm "
+                            className="flex items-center text-sm"
                             style={{ color: "var(--air_superiority_blue-500)" }}
                         >
                             <FiMapPin className="mr-2" />

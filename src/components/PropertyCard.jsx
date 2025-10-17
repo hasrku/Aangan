@@ -3,16 +3,12 @@ import { FiHeart, FiMapPin, FiMaximize } from "react-icons/fi";
 import { FaBed, FaBath } from "react-icons/fa6";
 
 const PropertyCard = ({ property }) => {
-    const { id, title, price, location, bedrooms, bathrooms, area, image, listing_type, isFavorite = false } = property;
+    const { id, title, price, location, bedrooms, bathrooms, area, images, listing_type, isFavorite = false } = property;
 
     const formatPrice = (price) => {
-        if (price >= 10000000) {
-            return `₹${(price / 10000000).toFixed(1)}Cr`;
-        } else if (price >= 100000) {
-            return `₹${(price / 100000).toFixed(1)}L`;
-        } else {
-            return `₹${price.toLocaleString()}`;
-        }
+        if (price >= 10000000) return `₹${(price / 10000000).toFixed(1)}Cr`;
+        if (price >= 100000) return `₹${(price / 100000).toFixed(1)}L`;
+        return `₹${price.toLocaleString()}`;
     };
 
     const listing_typeToBadgeClass = (t) => {
@@ -22,6 +18,12 @@ const PropertyCard = ({ property }) => {
         return "";
     };
 
+    // Use first image as cover or fallback
+    const coverImage =
+        images && images.length > 0
+            ? images[0]
+            : "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&h=300&fit=crop&crop=center&auto=format&q=80";
+
     return (
         <div
             className="bg-white rounded-xl shadow-sm border overflow-hidden hover:shadow-lg transition-all duration-300 group hover-lift"
@@ -30,7 +32,7 @@ const PropertyCard = ({ property }) => {
             {/* Image Container */}
             <div className="relative h-48 overflow-hidden">
                 <img
-                    src={image || `https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&h=300&fit=crop&crop=center&auto=format&q=80`}
+                    src={coverImage}
                     alt={title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />

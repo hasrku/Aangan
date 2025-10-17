@@ -101,7 +101,7 @@ const Home = () => {
                             >
                                 {filteredProperties.length} Properties Found
                             </h2>
-                            <p style={{ color: "var(--air_superiority_blue-400)" }}>Showing properties for {activeCategory}</p>
+                            <p className="text-sm text-gray-500">Showing properties for {activeCategory}</p>
                         </div>
 
                         {/* Properties Grid */}
