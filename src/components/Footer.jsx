@@ -190,12 +190,25 @@ const Footer = () => {
                         </div>
                     </div>
                 </div>
-                <br />
-                <div
-                    onClick={() => window.open("https://github.com/hasrku", "_blank")}
-                    className="text-gray-400 text-sm flex justify-center items-center gap-2 cursor-pointer"
-                >
-                    <FaGithub /> hasrku - Harshit Kushwaha
+
+                {/* made by Github links */}
+                <div className="border-t border-gray-800 border-dashed mt-7 mb-2 pt-5 text-center text-xs text-gray-400">made by</div>
+                <div className="flex flex-row justify-center items-center gap-4 text-gray-400 text-sm">
+                    <div
+                        title="Harshit Kushwaha"
+                        onClick={() => window.open("https://github.com/hasrku", "_blank")}
+                        className="border border-gray-800 border-dashed py-1 px-2 rounded-lg bg-gray-800/30 flex justify-center items-center gap-1.5 cursor-pointer hover:text-white hover:border-gray-700 hover:bg-gray-700/20 transition-colors duration-200"
+                    >
+                        <FaGithub /> hasrku
+                    </div>
+                    <p>&</p>
+                    <div
+                        title="Lalit Mahajan"
+                        onClick={() => window.open("https://github.com/Lalit-mahajan-1", "_blank")}
+                        className="border border-gray-800 border-dashed py-1 px-2 rounded-lg bg-gray-800/30 flex justify-center items-center gap-1.5 cursor-pointer hover:text-white hover:border-gray-700 hover:bg-gray-700/20 transition-colors duration-200"
+                    >
+                        <FaGithub /> Lalit-mahajan-1
+                    </div>
                 </div>
             </div>
         </footer>
