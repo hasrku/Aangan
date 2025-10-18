@@ -8,6 +8,10 @@ import { motion } from "framer-motion";
 import { fetchPropertyById } from "../backend/property";
 import toast from "react-hot-toast";
 
+import house1 from "../assets/house1.jpeg";
+import house2 from "../assets/house2.jpeg";
+import house3 from "../assets/house3.jpeg";
+
 const PropertyDetails = () => {
     const { id } = useParams();
     const [property, setProperty] = useState(null);
@@ -41,10 +45,8 @@ const PropertyDetails = () => {
         );
     }
 
-    const images =
-        property.images && property.images.length > 0
-            ? property.images
-            : ["https://images.unsplash.com/photo-1600607688969-a5bfcd646154?auto=format&fit=crop&w=1600&q=80"];
+    // const images = [house1, house2, house3];
+    const images = property.images && property.images.length > 0 ? property.images : [house1, house2, house3];
 
     const nextImage = () => setCurrentImage((prev) => (prev + 1) % images.length);
     const prevImage = () => setCurrentImage((prev) => (prev - 1 + images.length) % images.length);
