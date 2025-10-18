@@ -10,7 +10,7 @@ const Footer = () => {
                     {/* Company Info */}
                     <div className="space-y-4">
                         <div className="flex items-center space-x-3">
-                            <div className="bg-gradient-to-br from-red-500 to-red-600 p-3 rounded-xl shadow-lg">
+                            <div className="bg-gradient-to-br from-red-500 to-red-600 p-[7px] rounded-xl shadow-lg">
                                 <FiHome className="w-7 h-7 text-white" />
                             </div>
                             <div>

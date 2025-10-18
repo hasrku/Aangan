@@ -4,7 +4,7 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { FiMapPin, FiHeart, FiPhone, FiUser } from "react-icons/fi";
 import { GrFormNext, GrFormPrevious } from "react-icons/gr";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { fetchPropertyById } from "../backend/property";
 import toast from "react-hot-toast";
 
@@ -17,6 +17,7 @@ const PropertyDetails = () => {
     const [property, setProperty] = useState(null);
     const [loading, setLoading] = useState(true);
     const [currentImage, setCurrentImage] = useState(0);
+    const [direction, setDirection] = useState(0); // 1 → right, -1 → left
 
     useEffect(() => {
         const loadProperty = async () => {
@@ -48,8 +49,29 @@ const PropertyDetails = () => {
     // const images = [house1, house2, house3];
     const images = property.images && property.images.length > 0 ? property.images : [house1, house2, house3];
 
-    const nextImage = () => setCurrentImage((prev) => (prev + 1) % images.length);
-    const prevImage = () => setCurrentImage((prev) => (prev - 1 + images.length) % images.length);
+    const nextImage = () => {
+        setDirection(1);
+        setCurrentImage((prev) => (prev + 1) % images.length);
+    };
+
+    const prevImage = () => {
+        setDirection(-1);
+        setCurrentImage((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+    };
+
+    const variants = {
+        enter: (direction) => ({
+            x: direction > 0 ? 300 : -300,
+            opacity: 0,
+            scale: 1,
+        }),
+        center: { x: 0, opacity: 1, scale: 1 },
+        exit: (direction) => ({
+            x: direction > 0 ? -300 : 300,
+            opacity: 0,
+            scale: 1,
+        }),
+    };
 
     return (
         <div
@@ -58,42 +80,64 @@ const PropertyDetails = () => {
         >
             <Header />
 
-            <main className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-10 p-8 mt-6">
-                {/* Left: Carousel */}
+            <main className=" mx-20 flex flex-col lg:flex-row gap-10 p-8 mt-6">
                 <div className="md:w-[600px] w-full relative">
-                    <motion.div
-                        key={currentImage}
-                        initial={{ opacity: 0, scale: 0.98 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.4 }}
-                        className="rounded-2xl  overflow-hidden shadow-md relative"
-                    >
-                        <img
-                            src={images[currentImage]}
-                            alt={`Property view ${currentImage + 1}`}
-                            className="object-cover w-full h-[480px]"
-                        />
+                    {/* Carousel Container */}
+                    <div className="relative h-[450px] overflow-hidden rounded-2xl shadow-md bg-gray-100">
+                        <AnimatePresence
+                            custom={direction}
+                            initial={false}
+                        >
+                            <motion.img
+                                key={currentImage}
+                                src={images[currentImage]}
+                                alt={`Property view ${currentImage + 1}`}
+                                custom={direction}
+                                variants={{
+                                    enter: (direction) => ({
+                                        x: direction > 0 ? 300 : -300,
+                                        opacity: 0,
+                                        scale: 1,
+                                    }),
+                                    center: { x: 0, opacity: 1, scale: 1 },
+                                    exit: (direction) => ({
+                                        x: direction > 0 ? -300 : 300,
+                                        opacity: 0,
+                                        scale: 1,
+                                    }),
+                                }}
+                                initial="enter"
+                                animate="center"
+                                exit="exit"
+                                transition={{
+                                    x: { type: "spring", stiffness: 300, damping: 30 },
+                                    opacity: { duration: 0.3 },
+                                }}
+                                className="object-cover w-full h-full absolute top-0 left-0"
+                            />
+                        </AnimatePresence>
 
                         {/* Carousel Controls */}
                         {images.length > 1 && (
                             <>
                                 <button
                                     onClick={prevImage}
-                                    className="absolute top-1/2 left-3 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-700 rounded-full p-3 h-12 aspect-square flex justify-center items-center text-center text-2xl shadow-md transition"
+                                    className="absolute top-1/2 left-3 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-700 rounded-full p-3 h-12 aspect-square flex justify-center items-center text-2xl shadow-md transition"
                                 >
                                     <GrFormPrevious />
                                 </button>
                                 <button
                                     onClick={nextImage}
-                                    className="absolute top-1/2 right-3 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-700 rounded-full p-3 h-12 aspect-square flex justify-center items-center text-center text-2xl shadow-md transition"
+                                    className="absolute top-1/2 right-3 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-700 rounded-full p-3 h-12 aspect-square flex justify-center items-center text-2xl shadow-md transition"
                                 >
                                     <GrFormNext />
                                 </button>
                             </>
                         )}
-                    </motion.div>
 
-                    <p className="absolute top-3 left-3 bg-white px-2 py-1 rounded-md shadow-md">{property.listing_type}</p>
+                        {/* Listing Type Badge */}
+                        <p className="absolute top-3 left-3 bg-white px-2 py-1 rounded-md shadow-md">{property.listing_type}</p>
+                    </div>
 
                     {/* Thumbnail Row */}
                     {images.length > 1 && (
@@ -102,7 +146,10 @@ const PropertyDetails = () => {
                                 <img
                                     key={i}
                                     src={img}
-                                    onClick={() => setCurrentImage(i)}
+                                    onClick={() => {
+                                        setDirection(i > currentImage ? 1 : -1);
+                                        setCurrentImage(i);
+                                    }}
                                     className={`w-20 h-20 object-cover rounded-xl cursor-pointer border transition ${
                                         i === currentImage ? "border-[var(--prussian_blue-500)]" : "border-transparent opacity-70 hover:opacity-100"
                                     }`}

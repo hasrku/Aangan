@@ -50,10 +50,10 @@ const Header = () => {
                     {/* Logo */}
                     <div
                         onClick={() => navigate("/")}
-                        className="flex items-center"
+                        className="flex items-center cursor-pointer"
                     >
                         <div className="flex items-center space-x-3">
-                            <div className="bg-gradient-to-br from-red-500 to-red-600 p-3 rounded-xl shadow-lg">
+                            <div className="bg-gradient-to-br from-red-500 to-red-600 p-[6px] rounded-xl shadow-lg">
                                 <FiHome className="w-7 h-7 text-white" />
                             </div>
                             <div>

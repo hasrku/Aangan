@@ -8,10 +8,10 @@ import Footer from "../../components/Footer";
 import SkeletonCard from "../../components/SkeletonCard";
 import ConfirmBox from "../../components/ConfirmBox";
 
-import { supabase } from "../../utils/supabaseClient";
 import { useUser } from "../../utils/userContext";
 import { useNavigate } from "react-router-dom";
 import { uploadProperty, fetchUserProperties, deleteProperty } from "../../backend/property";
+import { updateUserProfile } from "../../backend/user";
 
 const Dashboard = () => {
     const { user, setUser, handleLogout } = useUser();
@@ -864,6 +864,12 @@ const ProfileSection = () => {
     }, [user]);
 
     const handleChange = (e) => {
+        const { name, value } = e.target;
+        // If phone input, allow only up to 10 digits
+        if (name === "phone") {
+            if (value.length > 10) return; // stop updating if more than 10
+        }
+
         setFormData({
             ...formData,
             [e.target.name]: e.target.value,
@@ -894,27 +900,21 @@ const ProfileSection = () => {
 
         setLoading(true);
         try {
-            const updates = {
-                firstName: formData.firstName,
-                lastName: formData.lastName,
-                phone: formData.phone,
-            };
+            const result = await updateUserProfile(formData);
 
-            // Update profile in Supabase 'users' table
-            const { error } = await supabase.from("profiles").update(updates).eq("id", user.sub);
-
-            if (error) throw error;
-
-            // Update user context
-            setUser({ ...user, ...updates });
-
-            toast.success("Profile updated successfully!");
-            setIsEditing(false);
+            if (result.success) {
+                // Update context state
+                setUser({
+                    ...user,
+                    ...formData,
+                });
+                setIsEditing(false);
+            }
         } catch (err) {
-            console.error("Error updating profile:", err);
-            toast.error(err.message || "Failed to update profile");
+            console.error(err);
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     return (
@@ -986,9 +986,10 @@ const ProfileSection = () => {
                         type="email"
                         name="email"
                         value={formData.email}
-                        onChange={handleChange}
-                        disabled={!isEditing}
-                        className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all duration-200"
+                        disabled={true}
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all duration-200 ${
+                            isEditing ? "disabled:cursor-not-allowed" : ""
+                        }`}
                         style={{ borderColor: "var(--air_superiority_blue-900)" }}
                     />
                 </div>
@@ -1002,8 +1003,10 @@ const ProfileSection = () => {
                         Phone
                     </label>
                     <input
-                        type="tel"
+                        type="number"
                         name="phone"
+                        maxLength={10}
+                        required
                         value={formData.phone}
                         onChange={handleChange}
                         disabled={!isEditing}
