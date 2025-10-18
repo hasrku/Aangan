@@ -1,62 +1,59 @@
-# Frontend - Property Buy/Sell Application
+# 🏠 Real Estate Dashboard (React + Supabase)
 
-## Setup Instructions
+A modern **property listing and management dashboard** built using **React (Vite)**, **Tailwind CSS**, and **Supabase**.  
+This app allows users to **sign up, log in, edit their profiles**, and **browse or manage property listings** with a sleek and responsive UI.
 
-### 1. Install Dependencies
+---
+
+## 🚀 Features
+
+-   🔐 **Supabase Authentication** (Email & Password)
+-   👤 **Profile Management** (Update name, phone, email)
+-   🏡 **Property Listing Carousel** with smooth image transitions
+-   🖼️ **Thumbnail previews** and responsive design
+-   ⚡ Built with **Vite + React + Tailwind CSS**
+-   🌐 Fully integrated with **Supabase Database & Auth**
+
+---
+
+## 🛠️ Tech Stack
+
+| Technology        | Description        |
+| ----------------- | ------------------ |
+| **React (Vite)**  | Frontend framework |
+| **Tailwind CSS**  | Styling framework  |
+| **Supabase**      | Auth & Database    |
+| **Framer Motion** | Animations         |
+| **React Icons**   | Icon pack          |
+
+---
+
+## ⚙️ Installation & Setup
+
+### 1️⃣ Clone the Repository
+
+```bash
+git clone https://github.com/hasrku/Aangan.git
+cd real-estate-dashboard
+```
+
+### 2️⃣ Install Dependencies
 
 ```bash
 npm install
 ```
 
-### 2. Environment Variables
+### 3️⃣ Set Up Environment Variables
 
-Create a `.env` file in the frontend directory with the following variables:
+Create a .env file in the root of your project and add the following:
 
-```env
-VITE_BACKEND_URL=http://localhost:5000
+```bash
+VITE_SUPABASE_URL=
+VITE_SUPABASE_ANON_KEY=
 ```
 
-### 3. Run the Development Server
+### 4️⃣ Run the Development Server
 
 ```bash
 npm run dev
 ```
-
-## Features
-
-### Authentication
-
--   **Login**: User login with email and password
--   **Signup**: User registration with form validation
--   **Logout**: User logout functionality
--   **Protected Routes**: JWT token-based authentication
-
-### API Integration
-
--   Axios instance configured with backend URL
--   Automatic token handling
--   Error handling and user feedback
--   Form validation
-
-## API Endpoints Used
-
--   `POST /api/auth/login` - User login
--   `POST /api/auth/signup` - User registration
--   `POST /api/auth/logout` - User logout
--   `GET /api/auth/profile` - Get user profile (protected)
-
-## Authentication Flow
-
-1. **Login/Signup**: Users authenticate and receive JWT token
-2. **Token Storage**: Token stored in localStorage
-3. **Automatic Headers**: Axios automatically adds Bearer token to requests
-4. **Token Expiry**: Automatic redirect to login on token expiry
-5. **Logout**: Token removed from localStorage
-
-## Dependencies
-
--   react: Frontend framework
--   react-router-dom: Routing
--   axios: HTTP client
--   react-icons: Icons
--   tailwindcss: Styling
