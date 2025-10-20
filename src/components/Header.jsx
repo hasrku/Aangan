@@ -1,18 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import {
-    FiSearch,
-    FiUser,
-    FiHeart,
-    FiShoppingCart,
-    FiBell,
-    FiHome,
-    FiLogIn,
-    FiUserPlus,
-    FiSettings,
-    FiLogOut,
-    FiHelpCircle,
-    FiInfo,
-} from "react-icons/fi";
+import { FiSearch, FiUser, FiHome, FiLogIn, FiUserPlus, FiLogOut } from "react-icons/fi";
 import { Link, useNavigate } from "react-router-dom";
 
 import { useUser } from "../utils/userContext";

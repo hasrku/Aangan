@@ -5,7 +5,7 @@ import { FaGithub } from "react-icons/fa";
 const Footer = () => {
     return (
         <footer className="bg-gray-900 text-white">
-            <div className="max-w-7xl mx-auto py-12">
+            <div className="max-w-7xl mx-auto pt-12 pb-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                     {/* Company Info */}
                     <div className="space-y-4">
@@ -192,7 +192,7 @@ const Footer = () => {
                 </div>
 
                 {/* made by Github links */}
-                <div className="border-t border-gray-800 border-dashed mt-7 mb-2 pt-5 text-center text-xs text-gray-400">made by</div>
+                <div className="border-t border-gray-800 border-dashed mt-7 mb-3 pt-5 text-center text-xs text-gray-400"></div>
                 <div className="flex flex-row justify-center items-center gap-4 text-gray-400 text-sm">
                     <div
                         title="Harshit Kushwaha"

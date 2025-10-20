@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { FiFilter, FiHome, FiDollarSign, FiMapPin, FiChevronDown } from "react-icons/fi";
 
-const Sidebar = ({ onFilterChange, activeCategory, setActiveCategory }) => {
-    const [priceRange, setPriceRange] = useState({ min: "", max: "" });
+const Sidebar = ({ onFilterChange }) => {
+    const [priceRange, setPriceRange] = useState({ min: 0, max: 0 });
     const [propertyType, setPropertyType] = useState("");
     const [location, setLocation] = useState("");
 
@@ -15,7 +15,6 @@ const Sidebar = ({ onFilterChange, activeCategory, setActiveCategory }) => {
             priceRange,
             propertyType,
             location,
-            category: activeCategory,
         });
     };
 
@@ -161,10 +160,10 @@ const Sidebar = ({ onFilterChange, activeCategory, setActiveCategory }) => {
                 {/* Clear Filters */}
                 <button
                     onClick={() => {
-                        setPriceRange({ min: "", max: "" });
+                        setPriceRange({ min: 0, max: 0 });
                         setPropertyType("");
                         setLocation("");
-                        setActiveCategory("all");
+                        onFilterChange({ priceRange: { min: 0, max: 0 }, propertyType: "", location: "" });
                     }}
                     className="w-full mt-3 text-sm py-2 px-4 rounded-lg border transition-all duration-200 font-medium"
                     style={{ color: "var(--prussian_blue-500)", borderColor: "var(--air_superiority_blue-900)" }}

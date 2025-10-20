@@ -4,6 +4,7 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { FiMapPin, FiHeart, FiPhone, FiUser } from "react-icons/fi";
 import { GrFormNext, GrFormPrevious } from "react-icons/gr";
+import { VscHistory } from "react-icons/vsc";
 import { motion, AnimatePresence } from "framer-motion";
 import { fetchPropertyById } from "../backend/property";
 import toast from "react-hot-toast";
@@ -27,6 +28,7 @@ const PropertyDetails = () => {
                 toast.error("Property not found!");
             } else {
                 setProperty(data);
+                console.log(data);
             }
             setLoading(false);
         };
@@ -72,6 +74,30 @@ const PropertyDetails = () => {
             scale: 1,
         }),
     };
+
+    // Helper function to calculate time ago
+    function getTimeAgo(dateString) {
+        const now = new Date();
+        const created = new Date(dateString);
+        const diffMs = now - created;
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+        if (diffDays < 1) {
+            const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+            return diffHours <= 1 ? "just now" : `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
+        } else if (diffDays < 7) {
+            return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
+        } else if (diffDays < 30) {
+            const weeks = Math.floor(diffDays / 7);
+            return `${weeks} week${weeks > 1 ? "s" : ""} ago`;
+        } else if (diffDays < 365) {
+            const months = Math.floor(diffDays / 30);
+            return `${months} month${months > 1 ? "s" : ""} ago`;
+        } else {
+            const years = Math.floor(diffDays / 365);
+            return `${years} year${years > 1 ? "s" : ""} ago`;
+        }
+    }
 
     return (
         <div
@@ -166,13 +192,19 @@ const PropertyDetails = () => {
                         className="bg-white p-8 rounded-2xl shadow-sm border"
                         style={{ borderColor: "var(--air_superiority_blue-900)" }}
                     >
-                        <div className="flex justify-between items-start mb-2">
-                            <h1
-                                className="text-3xl font-bold mb-2"
-                                style={{ color: "var(--prussian_blue-500)" }}
-                            >
-                                {property.title}
-                            </h1>
+                        <div className="flex gap-5 items-start mb-2">
+                            <div className="flex flex-1 justify-center items-center ">
+                                <h1
+                                    className="text-3xl font-bold mb-2"
+                                    style={{ color: "var(--prussian_blue-500)" }}
+                                >
+                                    {property.title}
+                                </h1>
+                                {/* 🕓 Listing Age */}
+                                <p className="text-sm flex justify-center items-center gap-1.5 ml-auto text-gray-500 italic">
+                                    <VscHistory className="size-4" /> {getTimeAgo(property.created_at)}
+                                </p>
+                            </div>
                             <button
                                 className="flex items-center justify-center p-2 rounded-lg border transition hover:bg-[var(--papaya_whip-800)]"
                                 style={{ borderColor: "var(--air_superiority_blue-900)" }}
@@ -184,6 +216,7 @@ const PropertyDetails = () => {
                             </button>
                         </div>
 
+                        {/* Location + Owner */}
                         <div
                             className="flex items-center text-sm"
                             style={{ color: "var(--air_superiority_blue-500)" }}
@@ -207,7 +240,8 @@ const PropertyDetails = () => {
                             </div>
                         </div>
 
-                        <div className="flex mb-4">
+                        {/* Price + Contact */}
+                        <div className="flex mb-4 mt-2">
                             <p className="text-lg font-semibold text-gray-800">₹{property.price}</p>
                             <p
                                 className="text-sm ml-auto"
@@ -217,6 +251,7 @@ const PropertyDetails = () => {
                             </p>
                         </div>
 
+                        {/* Description */}
                         <p
                             className="text-base leading-relaxed mb-6"
                             style={{ color: "var(--air_superiority_blue-400)" }}
@@ -224,6 +259,7 @@ const PropertyDetails = () => {
                             {property.description}
                         </p>
 
+                        {/* Property Info Grid */}
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <p className="text-sm text-gray-500">Bedrooms</p>
@@ -243,6 +279,7 @@ const PropertyDetails = () => {
                             </div>
                         </div>
 
+                        {/* Contact Button */}
                         <div className="flex gap-4 mt-6">
                             <button
                                 className="flex-1 py-2 px-4 rounded-lg font-medium flex items-center justify-center gap-2 transition"

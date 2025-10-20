@@ -20,7 +20,7 @@ const Home = () => {
             const getProperties = async () => {
                 setLoading(true);
                 const data = await fetchAllProperties();
-                console.log(data);
+                // console.log(data);
                 setProperties(data);
                 setFilteredProperties(activeCategory === "all" ? data : data.filter((p) => p.listing_type === activeCategory));
                 setLoading(false);
@@ -41,7 +41,7 @@ const Home = () => {
             filtered = filtered.filter((p) => Number(p.price) <= Number(filters.priceRange.max));
         }
         if (filters.propertyType) {
-            filtered = filtered.filter((p) => p.propertyType.toLowerCase() === filters.propertyType.toLowerCase());
+            filtered = filtered.filter((p) => p.property_type.toLowerCase() === filters.propertyType.toLowerCase());
         }
         if (filters.location) {
             filtered = filtered.filter((p) => p.location === filters.location);
@@ -58,11 +58,7 @@ const Home = () => {
             <Header />
 
             <div className="flex">
-                <Sidebar
-                    onFilterChange={handleFilterChange}
-                    activeCategory={activeCategory}
-                    setActiveCategory={setActiveCategory}
-                />
+                <Sidebar onFilterChange={handleFilterChange} />
 
                 <main className="flex-1 p-6 px-8">
                     <div className="max-w-7xl mx-auto">

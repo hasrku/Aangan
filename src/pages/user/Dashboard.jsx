@@ -2,6 +2,7 @@ import { useState, useEffect, use } from "react";
 import toast from "react-hot-toast";
 import { FiHome, FiPlus, FiHeart, FiSettings, FiMapPin, FiEye, FiTrash2 } from "react-icons/fi";
 import { GoHistory } from "react-icons/go";
+import { VscHistory } from "react-icons/vsc";
 
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
@@ -121,6 +122,7 @@ const ListingsSection = ({ setActiveTab, user }) => {
             if (!user) return;
             setLoading(true);
             const data = await fetchUserProperties(user.id || user.sub);
+            // console.log(data);
             setListings(data);
             setLoading(false);
         };
@@ -135,6 +137,30 @@ const ListingsSection = ({ setActiveTab, user }) => {
         }
         setConfirmOpen(false);
     };
+
+    // Helper function to calculate time ago
+    function getTimeAgo(dateString) {
+        const now = new Date();
+        const created = new Date(dateString);
+        const diffMs = now - created;
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+        if (diffDays < 1) {
+            const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+            return diffHours <= 1 ? "just now" : `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
+        } else if (diffDays < 7) {
+            return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
+        } else if (diffDays < 30) {
+            const weeks = Math.floor(diffDays / 7);
+            return `${weeks} week${weeks > 1 ? "s" : ""} ago`;
+        } else if (diffDays < 365) {
+            const months = Math.floor(diffDays / 30);
+            return `${months} month${months > 1 ? "s" : ""} ago`;
+        } else {
+            const years = Math.floor(diffDays / 365);
+            return `${years} year${years > 1 ? "s" : ""} ago`;
+        }
+    }
 
     return (
         <div>
@@ -194,23 +220,33 @@ const ListingsSection = ({ setActiveTab, user }) => {
                                 className="bg-white border border-gray-200 rounded-2xl shadow-sm hover:shadow-md transition overflow-hidden"
                             >
                                 {/* Image */}
-                                <div className="h-48 bg-gray-100">
+                                <div className="h-48 bg-gray-100 relative">
                                     <img
                                         src={coverImage}
                                         alt={listing.title}
                                         className="w-full h-full object-cover"
                                     />
+                                    <p className="absolute shadow-2xl top-2 left-2 bg-white bg-opacity-80 text-xs font-semibold text-gray-800 px-2 py-1 rounded">
+                                        {listing.listing_type}
+                                    </p>
                                 </div>
 
                                 {/* Details */}
                                 <div className="p-4">
-                                    <div className="flex items-center justify-between mb-2">
+                                    <div className="flex items-center justify-between mb-1">
                                         <h3 className="text-lg font-semibold text-gray-800 truncate">{listing.title}</h3>
                                         <p className="flex items-center text-gray-500 text-sm mt-1">
                                             <FiMapPin className="w-4 h-4 mr-1" /> {listing.location}
                                         </p>
                                     </div>
-                                    <div className="flex items-center justify-between mt-4">
+                                    <div className="flex justify-between items-center text-xs text-gray-600">
+                                        <p>{listing.property_type}</p>
+
+                                        <p className="flex justify-center items-center gap-1.5 ml-auto text-gray-500 italic">
+                                            <VscHistory className="size-3" /> {getTimeAgo(listing.created_at)}
+                                        </p>
+                                    </div>
+                                    <div className="flex items-center justify-between mt-2">
                                         <span className="text-lg font-semibold text-indigo-600">₹{listing.price}</span>
                                         <div className="flex gap-3">
                                             <button
