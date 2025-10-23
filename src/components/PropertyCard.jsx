@@ -30,7 +30,7 @@ const PropertyCard = ({ property }) => {
             style={{ borderColor: "var(--air_superiority_blue-900)" }}
         >
             {/* Image Container */}
-            <div className="relative h-48 overflow-hidden">
+            <div className="relative h-30 md:h-48 overflow-hidden">
                 <img
                     src={coverImage}
                     alt={title}
@@ -59,7 +59,7 @@ const PropertyCard = ({ property }) => {
                         {title}
                     </h3>
                     <span
-                        className="text-xl font-bold ml-2"
+                        className="text-xl font-bold ml-2 hidden md:inline-block"
                         style={{ color: "var(--prussian_blue-500)" }}
                     >
                         {formatPrice(price)}
@@ -72,6 +72,7 @@ const PropertyCard = ({ property }) => {
                 >
                     <FiMapPin className="w-4 h-4 mr-1" />
                     <span className="text-sm">{location}</span>
+                    <span className="text-xl font-bold ml-auto inline-block  md:hidden">{formatPrice(price)}</span>
                 </div>
 
                 <div

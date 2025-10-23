@@ -5,7 +5,7 @@ import { FaGithub } from "react-icons/fa";
 const Footer = () => {
     return (
         <footer className="bg-gray-900 text-white">
-            <div className="max-w-7xl mx-auto pt-12 pb-8">
+            <div className="max-w-7xl mx-auto pt-12 pb-8 px-10 lg:px-0">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                     {/* Company Info */}
                     <div className="space-y-4">

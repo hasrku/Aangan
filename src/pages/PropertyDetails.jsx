@@ -106,10 +106,10 @@ const PropertyDetails = () => {
         >
             <Header />
 
-            <main className=" mx-20 flex flex-col lg:flex-row gap-10 p-8 mt-6">
-                <div className="md:w-[600px] w-full relative">
+            <main className="mx-3 md:mx-20 flex flex-col lg:flex-row gap-10 md:p-8 mt-6">
+                <div className="lg:w-[600px] w-full relative">
                     {/* Carousel Container */}
-                    <div className="relative h-[450px] overflow-hidden rounded-2xl shadow-md bg-gray-100">
+                    <div className="relative w-full aspect-square md:h-[450px] overflow-hidden rounded-2xl shadow-md bg-gray-100">
                         <AnimatePresence
                             custom={direction}
                             initial={false}
@@ -241,7 +241,7 @@ const PropertyDetails = () => {
                         </div>
 
                         {/* Price + Contact */}
-                        <div className="flex mb-4 mt-2">
+                        <div className="flex mb-4 lg:mt-2">
                             <p className="text-lg font-semibold text-gray-800">₹{property.price}</p>
                             <p
                                 className="text-sm ml-auto"

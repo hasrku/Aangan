@@ -20,7 +20,7 @@ const Sidebar = ({ onFilterChange }) => {
 
     return (
         <aside
-            className="w-80 bg-white border-r h-full overflow-y-auto sidebar-scroll"
+            className="w-80 bg-white border-r h-full overflow-y-auto sidebar-scroll hidden md:block"
             style={{ borderColor: "var(--air_superiority_blue-900)" }}
         >
             <div className="p-6">

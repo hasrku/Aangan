@@ -5,6 +5,8 @@ import PropertyCard from "../components/PropertyCard";
 import Footer from "../components/Footer";
 import { fetchAllProperties } from "../backend/property";
 
+import { FiFilter } from "react-icons/fi";
+
 const Home = () => {
     const [properties, setProperties] = useState([]);
     const [filteredProperties, setFilteredProperties] = useState([]);
@@ -60,7 +62,7 @@ const Home = () => {
             <div className="flex">
                 <Sidebar onFilterChange={handleFilterChange} />
 
-                <main className="flex-1 p-6 px-8">
+                <main className="flex-1 p-6 px-3 md:px-8">
                     <div className="max-w-7xl mx-auto">
                         {/* Category Tabs */}
                         <div
@@ -87,6 +89,7 @@ const Home = () => {
                                     {category === "all" ? "All" : category}
                                 </button>
                             ))}
+                            {/* <FiFilter className="size-5" /> */}
                         </div>
 
                         {/* Results Count */}
@@ -102,7 +105,7 @@ const Home = () => {
 
                         {/* Properties Grid */}
                         {loading ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                                 {[...Array(8)].map((_, i) => (
                                     <div
                                         key={i}
@@ -110,7 +113,7 @@ const Home = () => {
                                         style={{ borderColor: "var(--air_superiority_blue-900)" }}
                                     >
                                         <div
-                                            className="h-48"
+                                            className="h-30 md:h-48"
                                             style={{ backgroundColor: "var(--air_superiority_blue-900)" }}
                                         ></div>
                                         <div className="p-4">
@@ -131,7 +134,7 @@ const Home = () => {
                                 ))}
                             </div>
                         ) : filteredProperties.length > 0 ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-6">
                                 {filteredProperties.map((property) => (
                                     <PropertyCard
                                         key={property.id}
