@@ -34,7 +34,7 @@ This app allows users to **sign up, log in, edit their profiles**, and **browse 
 
 ```bash
 git clone https://github.com/hasrku/Aangan.git
-cd real-estate-dashboard
+cd Aangan
 ```
 
 ### 2️⃣ Install Dependencies
