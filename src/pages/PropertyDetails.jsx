@@ -8,7 +8,7 @@ import { VscHistory } from "react-icons/vsc";
 import { motion, AnimatePresence } from "framer-motion";
 import { fetchPropertyById } from "../backend/property";
 import toast from "react-hot-toast";
-
+import { supabase } from "../utils/supabaseClient";
 import house1 from "../assets/house1.jpeg";
 import house2 from "../assets/house2.jpeg";
 import house3 from "../assets/house3.jpeg";
@@ -18,38 +18,64 @@ const PropertyDetails = () => {
     const [property, setProperty] = useState(null);
     const [loading, setLoading] = useState(true);
     const [currentImage, setCurrentImage] = useState(0);
-    const [direction, setDirection] = useState(0); // 1 → right, -1 → left
+    const [direction, setDirection] = useState(0);
+    const [isLiked, setIsLiked] = useState(false);
+    const [user, setUser] = useState(null);
 
     useEffect(() => {
-        const loadProperty = async () => {
+        const loadUserAndProperty = async () => {
             setLoading(true);
+            const { data: userData } = await supabase.auth.getUser();
+            if (userData?.user) setUser(userData.user);
+
             const data = await fetchPropertyById(id);
             if (!data) {
                 toast.error("Property not found!");
-            } else {
-                setProperty(data);
-                console.log(data);
+                setLoading(false);
+                return;
             }
+
+            setProperty(data);
+
+            // Check if user already liked this property
+            if (userData?.user) {
+                const { data: existing } = await supabase.from("likes").select("*").eq("user_id", userData.user.id).eq("property_id", id).single();
+                setIsLiked(!!existing);
+            }
+
             setLoading(false);
         };
-        loadProperty();
+        loadUserAndProperty();
     }, [id]);
 
-    if (loading) {
-        return <div className="min-h-screen flex items-center justify-center text-gray-600 text-lg">Loading property details...</div>;
-    }
+    const toggleLike = async () => {
+        if (!user) {
+            toast.error("You must be logged in to like a property!");
+            return;
+        }
 
-    if (!property) {
-        return (
-            <div className="min-h-screen flex flex-col items-center justify-center text-gray-600">
-                <p className="text-xl font-semibold mb-2">Property not found</p>
-                <p>It may have been deleted or doesn’t exist.</p>
-            </div>
-        );
-    }
+        if (isLiked) {
+            // Unlike
+            const { error } = await supabase.from("likes").delete().eq("user_id", user.id).eq("property_id", id);
 
-    // const images = [house1, house2, house3];
-    const images = property.images && property.images.length > 0 ? property.images : [house1, house2, house3];
+            if (error) {
+                toast.error("Failed to remove like.");
+            } else {
+                toast.success("Removed from likes.");
+                setIsLiked(false);
+            }
+        } else {
+            // Like
+            const { error } = await supabase.from("likes").insert([{ user_id: user.id, property_id: id }]);
+
+            if (error) {
+                toast.error("Failed to like property.");
+            } else {
+                toast.success("Added to liked properties!");
+                setIsLiked(true);
+            }
+        }
+    };
 
     const nextImage = () => {
         setDirection(1);
@@ -61,43 +87,28 @@ const PropertyDetails = () => {
         setCurrentImage((prev) => (prev === 0 ? images.length - 1 : prev - 1));
     };
 
-    const variants = {
-        enter: (direction) => ({
-            x: direction > 0 ? 300 : -300,
-            opacity: 0,
-            scale: 1,
-        }),
-        center: { x: 0, opacity: 1, scale: 1 },
-        exit: (direction) => ({
-            x: direction > 0 ? -300 : 300,
-            opacity: 0,
-            scale: 1,
-        }),
-    };
+    const images = property?.images && property.images.length > 0 ? property.images : [house1, house2, house3];
 
-    // Helper function to calculate time ago
-    function getTimeAgo(dateString) {
+    const getTimeAgo = (dateString) => {
         const now = new Date();
         const created = new Date(dateString);
-        const diffMs = now - created;
-        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        const diff = now - created;
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        if (days < 1) return "today";
+        if (days < 7) return `${days} day${days > 1 ? "s" : ""} ago`;
+        const weeks = Math.floor(days / 7);
+        return `${weeks} week${weeks > 1 ? "s" : ""} ago`;
+    };
 
-        if (diffDays < 1) {
-            const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-            return diffHours <= 1 ? "just now" : `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
-        } else if (diffDays < 7) {
-            return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
-        } else if (diffDays < 30) {
-            const weeks = Math.floor(diffDays / 7);
-            return `${weeks} week${weeks > 1 ? "s" : ""} ago`;
-        } else if (diffDays < 365) {
-            const months = Math.floor(diffDays / 30);
-            return `${months} month${months > 1 ? "s" : ""} ago`;
-        } else {
-            const years = Math.floor(diffDays / 365);
-            return `${years} year${years > 1 ? "s" : ""} ago`;
-        }
-    }
+    if (loading) return <div className="min-h-screen flex items-center justify-center text-gray-600 text-lg">Loading property details...</div>;
+
+    if (!property)
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center text-gray-600">
+                <p className="text-xl font-semibold mb-2">Property not found</p>
+                <p>It may have been deleted or doesn’t exist.</p>
+            </div>
+        );
 
     return (
         <div
@@ -107,8 +118,8 @@ const PropertyDetails = () => {
             <Header />
 
             <main className="mx-3 md:mx-20 flex flex-col lg:flex-row gap-10 md:p-8 mt-6">
+                {/* Left Section - Images */}
                 <div className="lg:w-[600px] w-full relative">
-                    {/* Carousel Container */}
                     <div className="relative w-full aspect-square md:h-[450px] overflow-hidden rounded-2xl shadow-md bg-gray-100">
                         <AnimatePresence
                             custom={direction}
@@ -119,22 +130,14 @@ const PropertyDetails = () => {
                                 src={images[currentImage]}
                                 alt={`Property view ${currentImage + 1}`}
                                 custom={direction}
-                                variants={{
-                                    enter: (direction) => ({
-                                        x: direction > 0 ? 300 : -300,
-                                        opacity: 0,
-                                        scale: 1,
-                                    }),
-                                    center: { x: 0, opacity: 1, scale: 1 },
-                                    exit: (direction) => ({
-                                        x: direction > 0 ? -300 : 300,
-                                        opacity: 0,
-                                        scale: 1,
-                                    }),
-                                }}
                                 initial="enter"
                                 animate="center"
                                 exit="exit"
+                                variants={{
+                                    enter: (d) => ({ x: d > 0 ? 300 : -300, opacity: 0 }),
+                                    center: { x: 0, opacity: 1 },
+                                    exit: (d) => ({ x: d > 0 ? -300 : 300, opacity: 0 }),
+                                }}
                                 transition={{
                                     x: { type: "spring", stiffness: 300, damping: 30 },
                                     opacity: { duration: 0.3 },
@@ -143,7 +146,6 @@ const PropertyDetails = () => {
                             />
                         </AnimatePresence>
 
-                        {/* Carousel Controls */}
                         {images.length > 1 && (
                             <>
                                 <button
@@ -161,70 +163,44 @@ const PropertyDetails = () => {
                             </>
                         )}
 
-                        {/* Listing Type Badge */}
                         <p className="absolute top-3 left-3 bg-white px-2 py-1 rounded-md shadow-md">{property.listing_type}</p>
                     </div>
-
-                    {/* Thumbnail Row */}
-                    {images.length > 1 && (
-                        <div className="flex gap-3 mt-4 justify-center">
-                            {images.map((img, i) => (
-                                <img
-                                    key={i}
-                                    src={img}
-                                    onClick={() => {
-                                        setDirection(i > currentImage ? 1 : -1);
-                                        setCurrentImage(i);
-                                    }}
-                                    className={`w-20 h-20 object-cover rounded-xl cursor-pointer border transition ${
-                                        i === currentImage ? "border-[var(--prussian_blue-500)]" : "border-transparent opacity-70 hover:opacity-100"
-                                    }`}
-                                    alt={`Thumbnail ${i + 1}`}
-                                />
-                            ))}
-                        </div>
-                    )}
                 </div>
 
-                {/* Right: Details */}
+                {/* Right Section - Details */}
                 <div className="lg:w-1/2 w-full space-y-8">
                     <div
                         className="bg-white p-8 rounded-2xl shadow-sm border"
                         style={{ borderColor: "var(--air_superiority_blue-900)" }}
                     >
                         <div className="flex gap-5 items-start mb-2">
-                            <div className="flex flex-1 justify-center items-center ">
+                            <div className="flex flex-col md:flex-row flex-1 justify-start items-start ">
                                 <h1
                                     className="text-3xl font-bold mb-2"
                                     style={{ color: "var(--prussian_blue-500)" }}
                                 >
                                     {property.title}
                                 </h1>
-                                {/* 🕓 Listing Age */}
-                                <p className="text-sm flex justify-center items-center gap-1.5 ml-auto text-gray-500 italic">
+                                <p className="flex text-sm justify-center items-center gap-1.5 md:ml-auto text-gray-500 italic">
                                     <VscHistory className="size-4" /> {getTimeAgo(property.created_at)}
                                 </p>
                             </div>
                             <button
+                                onClick={toggleLike}
                                 className="flex items-center justify-center p-2 rounded-lg border transition hover:bg-[var(--papaya_whip-800)]"
                                 style={{ borderColor: "var(--air_superiority_blue-900)" }}
                             >
-                                <FiHeart
-                                    className="text-xl"
-                                    style={{ color: "var(--prussian_blue-500)" }}
-                                />
+                                <FiHeart className={`text-xl transition ${isLiked ? "text-red-500 fill-red-500" : "text-gray-700"}`} />
                             </button>
                         </div>
 
-                        {/* Location + Owner */}
                         <div
                             className="flex items-center text-sm"
                             style={{ color: "var(--air_superiority_blue-500)" }}
                         >
                             <FiMapPin className="mr-2" />
                             <span>{property.location}</span>
-
-                            <div className="flex ml-auto items-center gap-3 opacity-80">
+                            <div className="flex ml-auto items-center gap-2 opacity-80">
                                 <div className="p-1 rounded-full bg-amber-50">
                                     <FiUser
                                         className="text-xl"
@@ -240,8 +216,7 @@ const PropertyDetails = () => {
                             </div>
                         </div>
 
-                        {/* Price + Contact */}
-                        <div className="flex mb-4 lg:mt-2">
+                        <div className="flex mb-4 ">
                             <p className="text-lg font-semibold text-gray-800">₹{property.price}</p>
                             <p
                                 className="text-sm ml-auto"
@@ -251,7 +226,6 @@ const PropertyDetails = () => {
                             </p>
                         </div>
 
-                        {/* Description */}
                         <p
                             className="text-base leading-relaxed mb-6"
                             style={{ color: "var(--air_superiority_blue-400)" }}
@@ -259,7 +233,6 @@ const PropertyDetails = () => {
                             {property.description}
                         </p>
 
-                        {/* Property Info Grid */}
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <p className="text-sm text-gray-500">Bedrooms</p>
@@ -279,7 +252,6 @@ const PropertyDetails = () => {
                             </div>
                         </div>
 
-                        {/* Contact Button */}
                         <div className="flex gap-4 mt-6">
                             <button
                                 className="flex-1 py-2 px-4 rounded-lg font-medium flex items-center justify-center gap-2 transition"

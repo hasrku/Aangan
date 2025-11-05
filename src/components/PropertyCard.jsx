@@ -36,11 +36,11 @@ const PropertyCard = ({ property }) => {
                     alt={title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
-                <div className="absolute top-3 right-3">
+                {/* <div className="absolute top-3 right-3">
                     <button className="p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-sm hover:bg-white transition-colors duration-200">
                         <FiHeart className={`w-4 h-4 ${isFavorite ? "text-red-500 fill-current" : "text-gray-600"}`} />
                     </button>
-                </div>
+                </div> */}
                 <div className="absolute top-3 left-3">
                     <span className={`px-3 py-1 text-white text-xs font-medium rounded-full ${listing_typeToBadgeClass(listing_type)}`}>
                         {listing_type}

@@ -12,6 +12,7 @@ const Home = () => {
     const [filteredProperties, setFilteredProperties] = useState([]);
     const [activeCategory, setActiveCategory] = useState("all");
     const [loading, setLoading] = useState(true);
+    const [sortOption, setSortOption] = useState("");
 
     useEffect(() => {
         document.title = "Aangan - Property Solutions";
@@ -52,6 +53,20 @@ const Home = () => {
         setFilteredProperties(filtered);
     };
 
+    useEffect(() => {
+        let sorted = [...properties];
+
+        if (sortOption === "lowToHigh") {
+            sorted.sort((a, b) => a.price - b.price);
+        } else if (sortOption === "highToLow") {
+            sorted.sort((a, b) => b.price - a.price);
+        } else if (sortOption === "newest") {
+            sorted.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        }
+
+        setFilteredProperties(sorted);
+    }, [sortOption, properties]);
+
     return (
         <div
             className="min-h-screen"
@@ -64,32 +79,56 @@ const Home = () => {
 
                 <main className="flex-1 p-6 px-3 md:px-8">
                     <div className="max-w-7xl mx-auto">
-                        {/* Category Tabs */}
-                        <div
-                            className="flex space-x-1 mb-6 p-1 rounded-lg w-fit"
-                            style={{ backgroundColor: "var(--papaya_whip-800)" }}
-                        >
-                            {["all", "sale", "rent"].map((category) => (
-                                <button
-                                    key={category}
-                                    onClick={() => setActiveCategory(category)}
-                                    className={`px-6 py-2 mr-2 rounded-md font-medium transition-colors duration-200 capitalize ${
-                                        activeCategory === category ? "shadow-sm border" : ""
-                                    }`}
-                                    style={
-                                        activeCategory === category
-                                            ? {
-                                                  color: "var(--prussian_blue-500)",
-                                                  backgroundColor: "#fff",
-                                                  borderColor: "var(--air_superiority_blue-900)",
-                                              }
-                                            : { color: "var(--air_superiority_blue-300)" }
-                                    }
+                        {/* Category + Sort Row */}
+                        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+                            {/* Category Tabs */}
+                            <div
+                                className="flex space-x-1 mb-4 md:mb-0 p-1 rounded-lg w-fit"
+                                style={{ backgroundColor: "var(--papaya_whip-800)" }}
+                            >
+                                {["all", "sale", "rent"].map((category) => (
+                                    <button
+                                        key={category}
+                                        onClick={() => setActiveCategory(category)}
+                                        className={`px-6 py-2 mr-2 rounded-md font-medium transition-colors duration-200 capitalize ${
+                                            activeCategory === category ? "shadow-sm border" : ""
+                                        }`}
+                                        style={
+                                            activeCategory === category
+                                                ? {
+                                                      color: "var(--prussian_blue-500)",
+                                                      backgroundColor: "#fff",
+                                                      borderColor: "var(--air_superiority_blue-900)",
+                                                  }
+                                                : { color: "var(--air_superiority_blue-300)" }
+                                        }
+                                    >
+                                        {category === "all" ? "All" : category}
+                                    </button>
+                                ))}
+                            </div>
+
+                            {/* Sort Dropdown */}
+                            <div className="relative w-48">
+                                <select
+                                    value={sortOption}
+                                    onChange={(e) => setSortOption(e.target.value)}
+                                    className="w-full px-4 py-2 border rounded-lg appearance-none focus:ring-2 focus:border-transparent outline-none transition-all duration-200"
+                                    style={{
+                                        borderColor: "var(--air_superiority_blue-900)",
+                                        color: "var(--prussian_blue-500)",
+                                        backgroundColor: "#fff",
+                                    }}
                                 >
-                                    {category === "all" ? "All" : category}
-                                </button>
-                            ))}
-                            {/* <FiFilter className="size-5" /> */}
+                                    <option value="">Sort by</option>
+                                    <option value="lowToHigh">Price: Low to High</option>
+                                    <option value="highToLow">Price: High to Low</option>
+                                    <option value="newest">Newest Arrivals</option>
+                                </select>
+
+                                {/* Dropdown arrow icon */}
+                                <span className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-gray-400">▼</span>
+                            </div>
                         </div>
 
                         {/* Results Count */}

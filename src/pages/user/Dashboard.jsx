@@ -4,6 +4,8 @@ import { FiHome, FiPlus, FiHeart, FiSettings, FiMapPin, FiEye, FiTrash2 } from "
 import { GoHistory } from "react-icons/go";
 import { VscHistory } from "react-icons/vsc";
 
+import { supabase } from "../../utils/supabaseClient";
+
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import SkeletonCard from "../../components/SkeletonCard";
@@ -721,18 +723,45 @@ const HistorySection = () => {
     );
 };
 
-// Liked Properties Section Component
 const LikedPropertiesSection = () => {
+    const { user } = useUser();
     const [likedProperties, setLikedProperties] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // TODO: Fetch user's liked properties
-        setTimeout(() => {
-            setLikedProperties([]);
+        if (!user?.sub) return; // wait until user is loaded
+
+        const fetchLikedProperties = async () => {
+            setLoading(true);
+
+            const { data, error } = await supabase
+                .from("likes")
+                .select(
+                    `
+                    property_id,
+                    properties (
+                        id,
+                        title,
+                        location,
+                        price,
+                        images
+                    )
+                `
+                )
+                .eq("user_id", user.sub); // ✅ use sub, not id
+
+            if (error) {
+                console.error("Error fetching liked properties:", error);
+            } else {
+                const formatted = data.map((item) => item.properties);
+                setLikedProperties(formatted);
+            }
+
             setLoading(false);
-        }, 1000);
-    }, []);
+        };
+
+        fetchLikedProperties();
+    }, [user]);
 
     return (
         <div>
@@ -767,9 +796,19 @@ const LikedPropertiesSection = () => {
                     {likedProperties.map((property) => (
                         <div
                             key={property.id}
-                            className="border rounded-lg p-4"
+                            onClick={() => (window.location.href = `/property/${property.id}`)}
+                            className="shadow-sm cursor-pointer border border-neutral-200 flex gap-5 rounded-lg p-0 hover:shadow-lg transition-shadow duration-200"
                         >
-                            {/* Liked property card content */}
+                            <img
+                                src={property.images?.[0]} // ✅ display first image
+                                alt={property.title}
+                                className="w-30 h-30 object-cover rounded-l-lg"
+                            />
+                            <div className="my-auto">
+                                <h3 className="font-semibold text-lg text-gray-800 mb-1">{property.title}</h3>
+                                <p className="text-gray-500 text-sm mb-2">{property.location}</p>
+                                <p className="text-gray-800 font-bold">₹{Number(property.price).toLocaleString()}</p>
+                            </div>
                         </div>
                     ))}
                 </div>
