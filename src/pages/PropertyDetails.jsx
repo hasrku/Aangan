@@ -165,6 +165,25 @@ const PropertyDetails = () => {
 
                         <p className="absolute top-3 left-3 bg-white px-2 py-1 rounded-md shadow-md">{property.listing_type}</p>
                     </div>
+                    {/* Thumbnail Row */}
+                    {images.length > 1 && (
+                        <div className="flex gap-3 mt-4 justify-center">
+                            {images.map((img, i) => (
+                                <img
+                                    key={i}
+                                    src={img}
+                                    onClick={() => {
+                                        setDirection(i > currentImage ? 1 : -1);
+                                        setCurrentImage(i);
+                                    }}
+                                    className={`w-20 h-20 object-cover rounded-xl cursor-pointer border transition ${
+                                        i === currentImage ? "border-[var(--prussian_blue-500)]" : "border-transparent opacity-70 hover:opacity-100"
+                                    }`}
+                                    alt={`Thumbnail ${i + 1}`}
+                                />
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 {/* Right Section - Details */}
