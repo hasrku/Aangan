@@ -123,7 +123,7 @@ const Home = () => {
                                     <option value="">Sort by</option>
                                     <option value="lowToHigh">Price: Low to High</option>
                                     <option value="highToLow">Price: High to Low</option>
-                                    <option value="newest">Newest Arrivals</option>
+                                    <option value="newest">Newest Listings</option>
                                 </select>
 
                                 {/* Dropdown arrow icon */}

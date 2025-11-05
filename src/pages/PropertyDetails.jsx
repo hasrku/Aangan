@@ -117,7 +117,7 @@ const PropertyDetails = () => {
         >
             <Header />
 
-            <main className="mx-3 md:mx-20 flex flex-col lg:flex-row gap-10 md:p-8 mt-6">
+            <main className="mx-3 md:mx-20 flex flex-col lg:flex-row gap-10 md:p-8 lg:mt-0 mt-6 mb-6 lg:mb-0">
                 {/* Left Section - Images */}
                 <div className="lg:w-[600px] w-full relative">
                     <div className="relative w-full aspect-square md:h-[450px] overflow-hidden rounded-2xl shadow-md bg-gray-100">
@@ -189,11 +189,11 @@ const PropertyDetails = () => {
                 {/* Right Section - Details */}
                 <div className="lg:w-1/2 w-full space-y-8">
                     <div
-                        className="bg-white p-8 rounded-2xl shadow-sm border"
+                        className="bg-white p-5 md:p-8 rounded-2xl shadow-sm border"
                         style={{ borderColor: "var(--air_superiority_blue-900)" }}
                     >
                         <div className="flex gap-5 items-start mb-2">
-                            <div className="flex flex-col md:flex-row flex-1 justify-start items-start ">
+                            <div className="flex flex-col md:flex-row flex-1 justify-start items-start md:items-center ">
                                 <h1
                                     className="text-3xl font-bold mb-2"
                                     style={{ color: "var(--prussian_blue-500)" }}
