@@ -42,16 +42,15 @@ const Login = () => {
 
         try {
             const data = await loginUser(formData.email, formData.password);
-            setUser(data.user.user_metadata);
-            // Wait for Supabase to persist session
-            setTimeout(() => {
-                navigate("/user/dashboard");
-            }, 2000); // 2000ms delay to allow session persistence
 
-            console.log("login success");
+            // ✅ Save the whole user structure into your application context
+            setUser(data.user);
+
+            console.log("Login success");
+            navigate("/user/dashboard");
         } catch (error) {
             console.error("Login error:", error);
-            setError(error.response?.data?.message || "Login failed. Please try again.");
+            setError(error.message || "Login failed. Please try again.");
         } finally {
             setIsLoading(false);
         }

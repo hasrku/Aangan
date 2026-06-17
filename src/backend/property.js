@@ -91,7 +91,7 @@ export const uploadProperty = async (formData, user, images) => {
                 bathrooms: formData.bathrooms ? parseInt(formData.bathrooms) : null,
                 area: formData.area,
                 furnishing_status: formData.furnishingStatus,
-                user_id: user.sub,
+                user_id: user.id,
                 images: uploadedImageUrls,
             },
         ]);

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "./supabaseClient";
 import { logoutUser } from "../backend/auth";
 
@@ -8,35 +8,78 @@ export const UserProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    // ✅ Check auth on mount
-    useEffect(() => {
-        async function checkAuth() {
-            const { data, error } = await supabase.auth.getSession();
-            if (error) console.error(error);
-            setUser(data?.session?.user || null);
-            setLoading(false);
+    const loadProfile = async (userId) => {
+        try {
+            const { data, error } = await supabase.from("users").select("*").eq("id", userId).single();
+
+            if (error) {
+                console.error(error);
+                setUser(null);
+                return;
+            }
+
+            setUser(data);
+        } catch (err) {
+            console.error(err);
+            setUser(null);
         }
+    };
 
-        checkAuth();
+    useEffect(() => {
+        const init = async () => {
+            try {
+                const {
+                    data: { session },
+                } = await supabase.auth.getSession();
 
-        // ✅ Subscribe to auth state changes (login/logout)
-        const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-            setUser(session?.user.user_metadata || null);
+                if (session?.user) {
+                    await loadProfile(session.user.id);
+                }
+            } catch (err) {
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        init();
+
+        const {
+            data: { subscription },
+        } = supabase.auth.onAuthStateChange((event, session) => {
+            console.log("AUTH EVENT:", event);
+
+            if (!session?.user) {
+                setUser(null);
+                return;
+            }
+
+            setTimeout(async () => {
+                await loadProfile(session.user.id);
+            }, 0);
         });
 
-        return () => {
-            listener.subscription.unsubscribe();
-        };
+        return () => subscription.unsubscribe();
     }, []);
 
-    // ✅ Logout handler
     const handleLogout = async () => {
         await logoutUser();
         setUser(null);
-        window.location.href = "/auth/login"; // ✅ correct way to redirect
+        window.location.href = "/auth/login";
     };
 
-    return <UserContext.Provider value={{ user, setUser, loading, handleLogout }}>{children}</UserContext.Provider>;
+    return (
+        <UserContext.Provider
+            value={{
+                user,
+                loading,
+                setUser,
+                handleLogout,
+            }}
+        >
+            {children}
+        </UserContext.Provider>
+    );
 };
 
 export const useUser = () => useContext(UserContext);

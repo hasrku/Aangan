@@ -2,6 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
 import Home from "./pages/Home";
+import TestSupabase from "./pages/TestSupabase";
 import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
 import Dashboard from "./pages/user/Dashboard";
@@ -16,6 +17,10 @@ const App = () => {
                         <Route
                             path="/"
                             element={<Home />}
+                        />
+                        <Route
+                            path="/test"
+                            element={<TestSupabase />}
                         />
                         <Route
                             path="/home"
