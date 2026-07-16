@@ -729,7 +729,12 @@ const LikedPropertiesSection = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!user?.sub) return; // wait until user is loaded
+        const userId = user?.id || user?.sub;
+
+        if (!userId) {
+            setLoading(false); // stop spinner even if there's no user yet
+            return;
+        }
 
         const fetchLikedProperties = async () => {
             setLoading(true);
@@ -738,22 +743,25 @@ const LikedPropertiesSection = () => {
                 .from("likes")
                 .select(
                     `
-                    property_id,
-                    properties (
-                        id,
-                        title,
-                        location,
-                        price,
-                        images
-                    )
-                `
+        property_id,
+        created_at,
+        properties (
+            id,
+            title,
+            location,
+            price,
+            images
+        )
+    `
                 )
-                .eq("user_id", user.sub); // ✅ use sub, not id
+                .eq("user_id", userId)
+                .order("created_at", { ascending: false }); // ✅ newest liked first
 
             if (error) {
                 console.error("Error fetching liked properties:", error);
+                setLikedProperties([]);
             } else {
-                const formatted = data.map((item) => item.properties);
+                const formatted = data.map((item) => item.properties).filter(Boolean); // guard against null joins (deleted property etc.)
                 setLikedProperties(formatted);
             }
 

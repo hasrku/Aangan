@@ -162,7 +162,7 @@ export const fetchPropertyById = async (id) => {
 // Fetch all properties with optional owner info
 export const fetchAllProperties = async () => {
     try {
-        const { data, error } = await supabase.from("properties").select(`*`);
+        const { data, error } = await supabase.from("properties").select(`*`).order("created_at", { ascending: false }); // ✅ latest first
 
         if (error) throw error;
 
